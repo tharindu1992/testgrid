@@ -23,6 +23,12 @@ centos_os_version="7.4"
 centos_ssh_username="centos"
 centos_source_ami_filter_name="CentOS Linux 7 x86_64 HVM EBS ENA*"
 centos_source_ami_filter_owner="679593333241"
+
+rhel_os_version="7.4"
+rhel_ssh_username="ec2-user"
+rhel_source_ami_filter_name="RHEL-7.4_HVM_GA-20170724-x86_64-1-Hourly2-GP2"
+rhel_source_ami_filter_owner="309956199498"
+
 packer_file="packer-conf.json"
 
 #=== FUNCTION ==================================================================
@@ -97,6 +103,7 @@ echo "Select the OS of the AMI:"
 echo "        1 - Ubuntu $ubuntu_os_version"
 echo "        2 - CentOS $centos_os_version"
 echo "        3 - Windows 2016"
+echo "        4 - RHEL $rhel_os_version"
 read os;
 case "$os" in
     1)
@@ -122,6 +129,16 @@ case "$os" in
     3)
 	os="Windows"
 	echo "Not implemented yet."
+        ;;
+    4)
+	os="RHEL"
+	export PACKER_SSH_USERNAME=$rhel_ssh_username
+	export PACKER_SOURCE_OS=$os
+	export PACKER_SOURCE_OS_VERSION=$rhel_os_version
+    export PACKER_SOURCE_AMI_FILTER_NAME=$rhel_source_ami_filter_name
+	export PACKER_SOURCE_AMI_FILTER_OWNER=$rhel_source_ami_filter_owner
+	downloadResourcesFromS3
+	checkResources
         ;;
     *)
         echo "$os is not a valid choice. Please enter the number"

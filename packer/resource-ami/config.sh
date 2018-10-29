@@ -44,6 +44,9 @@ function installPackage() {
     CentOS)
     sudo yum -y install $package
     ;;
+    RHEL)
+    sudo yum -y install $package
+    ;;
     esac
 }
 
@@ -91,6 +94,17 @@ function installJDKs() {
 	sudo yum install -y java-1.8.0-openjdk-devel
     sudo yum install -y wget #Dependency to download JCE policies
 	;;
+
+	RHEL)
+	#Installing ORACLE_JAVA8
+	echo "Installing ORACLE_JAVA8"
+	sudo yum localinstall -y resources/jdk-8u181-linux-x64.rpm
+	#Installing OpenJDK8
+	echo "Installing OPENJDK 8"
+	sudo yum install -y java-1.8.0-openjdk-devel
+    sudo yum install -y wget #Dependency to download JCE policies
+	;;
+
     esac
     #Download JCE policies
 	echo "Installing JCE policies (Presumed agreement on Oracle license at https://www.oracle.com/technetwork/java/javase/terms/license/index.html)"
@@ -163,6 +177,20 @@ function installSQLclientsAndTools() {
 	sudo sh -c "echo /usr/lib/oracle/12.2/client64/lib > /etc/ld.so.conf.d/oracle-instantclient.conf"
 	sudo ldconfig
 	;;
+	RHEL)
+	#Add MSSQL repositories
+	echo "Adding MSSQL repositories"
+	sudo su -c "curl https://packages.microsoft.com/config/rhel/7/prod.repo > /etc/yum.repos.d/msprod.repo"
+	#Installing tools
+	sudo ACCEPT_EULA=Y yum install -y mssql-tools
+	sudo yum -y install unixODBC-devel mysql postgresql
+	#Installing Oracle
+	sudo yum -y install resources/oracle-instantclient12.2-basic-12.2.0.1.0-1.x86_64.rpm
+	sudo yum -y install resources/oracle-instantclient12.2-sqlplus-12.2.0.1.0-1.x86_64.rpm
+	#Add symbolic links
+	sudo sh -c "echo /usr/lib/oracle/12.2/client64/lib > /etc/ld.so.conf.d/oracle-instantclient.conf"
+	sudo ldconfig
+	;;
     esac
 }
 
@@ -199,6 +227,11 @@ function updatePathVariable() {
 	#echo 'PATH=/opt/mssql-tools/bin:/usr/lib/oracle/12.2/client64/bin:$PATH' | sudo tee --append /etc/environment	
 	;;
     CentOS)
+	sudo su -c "echo 'pathmunge /opt/mssql-tools/bin:/usr/lib/oracle/12.2/client64/bin' > /etc/profile.d/testgrid-libs.sh"
+	sudo chmod +x /etc/profile.d/testgrid-libs.sh
+	. /etc/profile
+	;;
+	RHEL)
 	sudo su -c "echo 'pathmunge /opt/mssql-tools/bin:/usr/lib/oracle/12.2/client64/bin' > /etc/profile.d/testgrid-libs.sh"
 	sudo chmod +x /etc/profile.d/testgrid-libs.sh
 	. /etc/profile
@@ -253,6 +286,10 @@ function installDependenciesForPython() {
 	sudo yum groupinstall -y "Development Tools"
 	sudo yum install -y zlib-devel	        #Dependency for python installing
 	;;
+	RHEL)
+	sudo yum groupinstall -y "Development Tools"
+	sudo yum install -y zlib-devel	        #Dependency for python installing
+	;;
     esac
     installPackage "bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-devel"
 }
@@ -300,9 +337,27 @@ function installCfnSignalLibrary() {
 function installPythonArtifacts() {
     echo "Installing Python artifacts"
     #Installing pip for sudoers
-    installPackage epel-release
+    #RHEL
+    case "$AMI_OS" in
+    Ubuntu)
+	installPackage epel-release
     installPackage python-pip
     sudo pip install virtualenv #Necessary for WSO2 integration-test python repositories
+	;;
+    CentOS)
+	installPackage epel-release
+    installPackage python-pip
+    sudo pip install virtualenv #Necessary for WSO2 integration-test python repositories
+	;;
+	RHEL)
+	wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    sudo yum install epel-release-latest-7.noarch.rpm -y
+
+	installPackage epel-release
+    installPackage python-pip
+    sudo pip install virtualenv #Necessary for WSO2 integration-test python repositories
+	;;
+    esac
 }
 
 #=== FUNCTION ==================================================================
@@ -341,6 +396,9 @@ function showInstallations() {
     CentOS)
 	sudo update-alternatives --display java #list is only working in ubuntu.
 	;;
+	RHEL)
+	sudo update-alternatives --display java #list is only working in ubuntu.
+	;;
     esac
 	echo
 	echo "----PATH variable----"
@@ -364,13 +422,15 @@ function showInstallations() {
     echo
 }
 
-
 case "$AMI_OS" in
     Ubuntu)
 	showMessage "Starting Ubuntu configuration steps.."
         ;;
     CentOS)
 	showMessage "Starting CentOS configuration steps.."
+        ;;
+    RHEL)
+	showMessage "Starting RHEL configuration steps.."
         ;;
     Windows)
 	showMessage "Windows configurations steps are not added yet."
@@ -399,8 +459,9 @@ showMessage "6.Updating PathVariable"
 updatePathVariable;
 showMessage "7.Installing Tinkerer agent"
 installTinkererAgent
-showMessage "8.Installing Python"
+showMessage "8.Installing Dependencies For Python"
 installDependenciesForPython
+showMessage "9.Installing Python"
 installPython 3.5.6 #3.5 version is necessary for CFN-Signal library
 installPython 3.6.7 #3.6 version is necessary for WSO2 integration-test python repositories
 installPythonArtifacts
