@@ -24,7 +24,6 @@ import ReactTooltip from 'react-tooltip'
 import FlatButton from 'material-ui/FlatButton';
 import {HTTP_UNAUTHORIZED, LOGIN_URI, TESTGRID_CONTEXT} from '../constants.js';
 import {Table, Input, Alert} from 'reactstrap';
-import {Button} from "reactstrap";
 import Moment from "moment/moment";
 
 class DeploymentPatternView extends Component {
@@ -191,7 +190,6 @@ class DeploymentPatternView extends Component {
             <th className="text-center">Infra Combination</th>
             <th rowSpan='2' className="text-center">Last Build</th>
             <th rowSpan='2' className="text-center">Last Failure</th>
-            <th rowSpan='2' className="text-center">Execute</th>
           </tr>
           <tr class='infra-param-header'>
             <td>
@@ -271,14 +269,15 @@ class DeploymentPatternView extends Component {
                           }
                         })()}
                       </td>
-                      <td>
+                      {/* Note: Commented until the backend coordination is configured.
+                        <td>
                         <Button outline color="info" size="sm" onClick={() => {
                           window.location =
                             '/admin/job/' + this.state.product.productName + '/build'
                         }}>
                           <i className="fa fa-play-circle" aria-hidden="true"> </i>
                         </Button>
-                        <ReactTooltip/></td>
+                        <ReactTooltip/></td>*/}
                     </tr>
                   )
                 } else {
@@ -344,14 +343,15 @@ class DeploymentPatternView extends Component {
                           }
                         })()}
                       </td>
-                      <td>
+                      {/* Note: Commented until the backend coordination is configured.
+                        <td>
                         <Button outline color="info" size="sm" onClick={() => {
                           window.location =
                             '/admin/job/' + this.state.product.productName + '/build'
                         }}>
                           <i className="fa fa-play-circle" aria-hidden="true"> </i>
                         </Button>
-                      </td>
+                      </td> */}
                     </tr>
                   )
                 }
