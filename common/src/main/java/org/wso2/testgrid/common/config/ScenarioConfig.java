@@ -183,7 +183,7 @@ public class ScenarioConfig implements Serializable {
      */
     public String getFile() {
 
-        return name + "/" + file;
+        return file;
     }
 
     /**
