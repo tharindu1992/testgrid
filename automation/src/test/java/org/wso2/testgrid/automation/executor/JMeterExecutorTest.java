@@ -91,6 +91,7 @@ public class JMeterExecutorTest {
         ScenarioConfig scenarioConfig = new ScenarioConfig();
         scenarioConfig.setTestType(TestGridConstants.TEST_TYPE_FUNCTIONAL);
         scenarioConfig.setFile("");
+        scenarioConfig.setName("test");
         scenarioConfigs.add(scenarioConfig);
         testPlan.setScenarioConfigs(scenarioConfigs);
         testPlan.setScenarioTestsRepository(testLocation);

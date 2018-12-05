@@ -42,7 +42,7 @@ jobProperties:
   PROPERTY1: value1
 keyFileLocation: workspace/testkey.pem
 scenarioConfigs:
-- file: run-scenarios.sh
+- file: integration-tests/run-scenarios.sh
   inputParameters:
     DBPassword: DB_Password
     DBUsername: wso2carbon
